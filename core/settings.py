@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,16 +42,17 @@ INSTALLED_APPS = [
     'graphene_django',
     'users',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig', # add graphql_jwt refresh token model in admin panel
-    'graphql_auth', # out of the box authentication and user management functionalities (like registration, password reset, email verification, etc.) for GraphQL APIs, typically using graphene-django.
+    # there is a compatibility issue between graphql_auth and newer django versions 
+    # 'graphql_auth', # out of the box authentication and user management functionalities (like registration, password reset, email verification, etc.) for GraphQL APIs, typically using graphene-django.
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'graphql_jwt.middleware.JSONWebTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -140,7 +142,30 @@ GRAPHENE = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    # "graphql_jwt.backends.JSONWebTokenBackend", # we need this backend only when manually implementing functionalities like registration, password reset, email verification, etc.
-    "graphql_auth.backends.GraphQLAuthBackend", # when using django-graphql-auth you need to use this backend instead of the commented one
+    # we will use graphql_jwt and we will implement all the auth functionality manually ;)
+    "graphql_jwt.backends.JSONWebTokenBackend", # we need this backend only when manually implementing functionalities like registration, password reset, email verification, etc.
+    # since we have problems with graphql_auth so we will remove it 
+    # "graphql_auth.backends.GraphQLAuthBackend", # when using django-graphql-auth you need to use this backend instead of the commented one
     "django.contrib.auth.backends.ModelBackend",
-]
+] 
+
+
+GRAPHQL_JWT = {
+    "JWT_VERIFY_EXPIRATION": True,
+    "JWT_EXPIRATION_DELTA": timedelta(minutes=15),  # Access token lifetime
+    "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7), # Refresh token lifetime
+    "JWT_ALLOW_REFRESH": True, # Enable refresh tokens
+    # Consider using JWT_AUTH_HEADER_PREFIX = "Bearer" for standard compliance
+    "JWT_AUTH_HEADER_PREFIX": "Bearer",
+}
+
+# console EmailBackend for testing only
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.example.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'your_email@example.com'
+# EMAIL_HOST_PASSWORD = 'your_password'
+# DEFAULT_FROM_EMAIL = 'webmaster@example.com'
