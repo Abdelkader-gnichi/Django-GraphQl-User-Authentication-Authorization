@@ -10,6 +10,9 @@ class BaseModelMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at= models.DateTimeField(auto_now=True)
 
+    class Meta:
+        abstract = True
+
 class CustomUser(AbstractUser, BaseModelMixin):
     
     email = models.EmailField(max_length=255, blank=False, null=False, unique=True, required=True, verbose_name='email')
