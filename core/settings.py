@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'users',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig', # add graphql_jwt refresh token model in admin panel
+    'graphql_auth', # out of the box authentication and user management functionalities (like registration, password reset, email verification, etc.) for GraphQL APIs, typically using graphene-django.
 ]
 
 MIDDLEWARE = [
@@ -139,6 +140,7 @@ GRAPHENE = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    "graphql_jwt.backends.JSONWebTokenBackend",
+    # "graphql_jwt.backends.JSONWebTokenBackend", # we need this backend only when manually implementing functionalities like registration, password reset, email verification, etc.
+    "graphql_auth.backends.GraphQLAuthBackend", # when using django-graphql-auth you need to use this backend instead of the commented one
     "django.contrib.auth.backends.ModelBackend",
 ]
