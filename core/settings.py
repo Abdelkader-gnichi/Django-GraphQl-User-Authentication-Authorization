@@ -26,7 +26,6 @@ SECRET_KEY = 'django-insecure-a&525=w53@)iczx%lgjjgl06lysozq5_x_lp9!woi(xz(n7%(v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -50,11 +49,12 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'graphql_jwt.middleware.JSONWebTokenMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+   
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -134,8 +134,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL='users.CustomUser'
 
 
+ALLOWED_HOSTS = ['*']
+CORS_ALLOW_ALL_ORIGINS = True # For development ONLY
+# Or configure specific origins:
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000", # Example React frontend
+#     "http://127.0.0.1:8000", # GraphiQL if served differently
+# ]
+CORS_ALLOW_CREDENTIALS = True #
+
 GRAPHENE = {
-    # "SCHEMA": "mysite.myschema.schema",
+    "SCHEMA": "core.schema.schema",
     "MIDDLEWARE": [
         "graphql_jwt.middleware.JSONWebTokenMiddleware",
     ],
@@ -152,6 +161,7 @@ AUTHENTICATION_BACKENDS = [
 
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
+    "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
     "JWT_EXPIRATION_DELTA": timedelta(minutes=15),  # Access token lifetime
     "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7), # Refresh token lifetime
     "JWT_ALLOW_REFRESH": True, # Enable refresh tokens

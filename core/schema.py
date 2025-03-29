@@ -1,6 +1,5 @@
 import graphene
 import graphql_jwt
-
 from users.schema import UserType 
 from users.mutations import AuthMutation 
 
@@ -13,7 +12,7 @@ class Query(graphene.ObjectType):
         return info.context.user
 
     # Add other queries here...
-    node = graphene.relay.Node.Field() # If using Relay
+    # node = graphene.relay.Node.Field() # If using Relay
 
 
 class Mutation(AuthMutation, graphene.ObjectType): # Inherit from AuthMutation
