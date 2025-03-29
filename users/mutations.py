@@ -9,6 +9,8 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str # Use force_str instead of force_text
 from graphql_jwt.decorators import login_required
 
+from users.forms import CustomUserCreationForm
+
 from .schema import UserType # Import the UserType we defined
 
 UserModel = get_user_model()
@@ -27,7 +29,9 @@ class RegisterMutation(graphene.Mutation):
     class Arguments:
         username = graphene.String(required=True)
         email = graphene.String(required=True)
-        password = graphene.String(required=True)
+        first_name = graphene.String()
+        last_name = graphene.String()
+        password1 = graphene.String(required=True)
         password2 = graphene.String(required=True)
 
     success = graphene.Boolean()
@@ -35,11 +39,18 @@ class RegisterMutation(graphene.Mutation):
     errors = graphene.List(graphene.String)
 
     @staticmethod
-    def mutate(root, info, username, email, password, password2):
-        if password != password2:
-            return RegisterMutation(success=False, errors=["Passwords do not match."])
-
-        form = UserCreationForm({'username': username, 'email': email, 'password': password}) # Password2 handled by form
+    def mutate(root, info, username, email, password1, password2, first_name = None, last_name = None):
+       
+        form = CustomUserCreationForm(
+            {
+                'username': username, 
+                'email': email, 
+                'first_name' : first_name, 
+                'last_name': last_name,
+                'password1': password1,
+                'password2': password2,
+            }
+        ) 
 
         if form.is_valid():
             user = form.save()
