@@ -8,7 +8,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str # Use force_str instead of force_text
 from graphql_jwt.decorators import login_required
 
-from users.forms import CustomUserCreationForm
+from users.forms import CustomUserCreationForm, UserUpdateForm
 
 from .schema import UserType # Import the UserType we defined
 
@@ -154,9 +154,41 @@ class PasswordChangeMutation(graphene.Mutation):
             return PasswordChangeMutation(success=False, errors=get_form_errors(form))
 
 
+class UpdateUserMutation(graphene.Mutation):
+    class Arguments:
+        username = graphene.String()
+        email = graphene.String()
+        first_name = graphene.String()
+        last_name = graphene.String()
+    
+
+    success = graphene.Boolean()
+    user = graphene.Field(UserType) # Return the updated user object
+    errors = graphene.List(graphene.String)
+
+    @login_required 
+    @staticmethod
+    def mutate(root, info, **kwargs):
+        user = info.context.user 
+
+        update_data = {k: v for k, v in kwargs.items() if v is not None}
+
+        if not update_data:
+            return UpdateUserMutation(success=True, user=user, errors=["No update data provided."])
+
+        # Use the UserUpdateForm, passing the data and the instance to update
+        form = UserUpdateForm(data=update_data, instance=user)
+
+        if form.is_valid():
+            updated_user = form.save()
+            return UpdateUserMutation(success=True, user=updated_user)
+        else:
+            return UpdateUserMutation(success=False, user=user, errors=get_form_errors(form))
+
 # --- Combine all mutations ---
 class AuthMutation(graphene.ObjectType):
     register = RegisterMutation.Field()
     request_password_reset = RequestPasswordResetMutation.Field()
     password_set = PasswordSetMutation.Field() # Name avoids conflict if using relay
     password_change = PasswordChangeMutation.Field()
+    update_user = UpdateUserMutation.Field()
