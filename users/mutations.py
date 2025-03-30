@@ -1,4 +1,3 @@
-# users/mutations.py
 import graphene
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.forms import (
