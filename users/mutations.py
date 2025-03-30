@@ -37,8 +37,8 @@ class RegisterMutation(graphene.Mutation):
     user = graphene.Field(UserType)
     errors = graphene.List(graphene.String)
 
-    @staticmethod
-    def mutate(root, info, username, email, password1, password2, first_name = None, last_name = None):
+    @classmethod
+    def mutate(cls, root, info, username, email, password1, password2, first_name = None, last_name = None):
        
         form = CustomUserCreationForm(
             {
@@ -67,8 +67,8 @@ class RequestPasswordResetMutation(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
 
-    @staticmethod
-    def mutate(root, info, email):
+    @classmethod
+    def mutate(cls, root, info, email):
         form = PasswordResetForm({'email': email})
         if form.is_valid():
             # You NEED to configure email settings in settings.py for this to work!
@@ -104,8 +104,8 @@ class PasswordSetMutation(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
 
-    @staticmethod
-    def mutate(root, info, uidb64, token, new_password1, new_password2):
+    @classmethod
+    def mutate(cls, root, info, uidb64, token, new_password1, new_password2):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
             user = UserModel._default_manager.get(pk=uid)
@@ -135,8 +135,8 @@ class PasswordChangeMutation(graphene.Mutation):
     errors = graphene.List(graphene.String)
 
     @login_required # Protect this mutation
-    @staticmethod
-    def mutate(root, info, old_password, new_password1, new_password2):
+    @classmethod
+    def mutate(cls, root, info, old_password, new_password1, new_password2):
         user = info.context.user
         form = PasswordChangeForm(user, {
             'old_password': old_password,
@@ -167,8 +167,8 @@ class UpdateUserMutation(graphene.Mutation):
     errors = graphene.List(graphene.String)
 
     @login_required 
-    @staticmethod
-    def mutate(root, info, **kwargs):
+    @classmethod
+    def mutate(cls, root, info, **kwargs):
         user = info.context.user 
 
         update_data = {k: v for k, v in kwargs.items() if v is not None}
