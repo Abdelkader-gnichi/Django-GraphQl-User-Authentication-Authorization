@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'graphene_django',
-    'users',
+    'users.apps.UsersConfig',
     'graphql_jwt.refresh_token.apps.RefreshTokenConfig', # add graphql_jwt refresh token model in admin panel
     # there is a compatibility issue between graphql_auth and newer django versions 
     # 'graphql_auth', # out of the box authentication and user management functionalities (like registration, password reset, email verification, etc.) for GraphQL APIs, typically using graphene-django.
