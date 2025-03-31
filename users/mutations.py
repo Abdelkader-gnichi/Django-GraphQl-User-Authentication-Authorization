@@ -134,8 +134,8 @@ class PasswordChangeMutation(graphene.Mutation):
     success = graphene.Boolean()
     errors = graphene.List(graphene.String)
 
-    @login_required # Protect this mutation
     @classmethod
+    @login_required # Protect this mutation
     def mutate(cls, root, info, old_password, new_password1, new_password2):
         user = info.context.user
         form = PasswordChangeForm(user, {
@@ -149,9 +149,9 @@ class PasswordChangeMutation(graphene.Mutation):
             # Optional: Update session auth hash if using sessions alongside JWT
             # from django.contrib.auth import update_session_auth_hash
             # update_session_auth_hash(info.context, form.user)
-            return PasswordChangeMutation(success=True)
+            return cls(success=True)
         else:
-            return PasswordChangeMutation(success=False, errors=get_form_errors(form))
+            return cls(success=False, errors=get_form_errors(form))
 
 
 class UpdateUserMutation(graphene.Mutation):
@@ -166,24 +166,33 @@ class UpdateUserMutation(graphene.Mutation):
     user = graphene.Field(UserType) # Return the updated user object
     errors = graphene.List(graphene.String)
 
-    @login_required 
+    form = UserUpdateForm
+
     @classmethod
+    @login_required 
     def mutate(cls, root, info, **kwargs):
         user = info.context.user 
 
         update_data = {k: v for k, v in kwargs.items() if v is not None}
-
+        
         if not update_data:
-            return UpdateUserMutation(success=True, user=user, errors=["No update data provided."])
+            return cls(success=True, user=user, errors=["No update data provided."])
+
+
+        fields = cls.form.Meta.fields
+        
+        for field in fields:
+            if field not in update_data:
+                update_data[field] = getattr(user, field)
 
         # Use the UserUpdateForm, passing the data and the instance to update
-        form = UserUpdateForm(data=update_data, instance=user)
+        f = cls.form(data=update_data, instance=user)
 
-        if form.is_valid():
-            updated_user = form.save()
-            return UpdateUserMutation(success=True, user=updated_user)
+        if f.is_valid():
+            updated_user = f.save()
+            return cls(success=True, user=updated_user)
         else:
-            return UpdateUserMutation(success=False, user=user, errors=get_form_errors(form))
+            return cls(success=False, user=user, errors=get_form_errors(f))
 
 # --- Combine all mutations ---
 class AuthMutation(graphene.ObjectType):

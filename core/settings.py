@@ -162,7 +162,7 @@ AUTHENTICATION_BACKENDS = [
 GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
-    "JWT_EXPIRATION_DELTA": timedelta(minutes=15),  # Access token lifetime
+    "JWT_EXPIRATION_DELTA": timedelta(hours=3),  # Access token lifetime
     "JWT_REFRESH_EXPIRATION_DELTA": timedelta(days=7), # Refresh token lifetime
     "JWT_ALLOW_REFRESH": True, # Enable refresh tokens
     # Consider using JWT_AUTH_HEADER_PREFIX = "Bearer" for standard compliance
